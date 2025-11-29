@@ -1,9 +1,8 @@
 import React from 'react';
-import { Experience } from '../types';
-import Button from './Button';
+import { EnhancedExperience } from '../types';
 
 interface ExperienceCardProps {
-  experience: Experience;
+  experience: EnhancedExperience;
   isToday?: boolean;
   isCompleted?: boolean;
   onClick: () => void;
@@ -20,7 +19,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({ experience, isToday, is
     >
       <div className="relative h-48 overflow-hidden">
         <img 
-          src={experience.imageUrl} 
+          src={experience.hero_image} 
           alt={experience.title} 
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -43,17 +42,17 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({ experience, isToday, is
             <h3 className="font-bold text-lg text-gray-900 line-clamp-2">{experience.title}</h3>
         </div>
         
-        <p className="text-gray-500 text-sm mb-4 line-clamp-2">{experience.description}</p>
+        <p className="text-gray-500 text-sm mb-4 line-clamp-2">{experience.tagline}</p>
         
         <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {experience.estimated_time}
+                    {experience.estimated_time.typical}m
                 </span>
                 <span className="flex items-center gap-1 capitalize">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                    {experience.difficulty_level}
+                    {experience.difficulty_level.replace('_', ' ')}
                 </span>
             </div>
         </div>

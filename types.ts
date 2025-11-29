@@ -1,6 +1,7 @@
 export interface UserProfile {
   id: string;
   name?: string;
+  tier: 'free' | 'premium';
   personality_data: {
     traits: string[];
     interests: string[];
@@ -14,37 +15,162 @@ export interface UserProfile {
   };
 }
 
-export interface Experience {
+export interface MaterialItem {
+  name: string;
+  description: string;
+  required: boolean;
+  where_to_find: string;
+  approximate_cost: string;
+  alternatives: string[];
+  image_url?: string;
+}
+
+export interface CommonMistake {
+  mistake: string;
+  why_it_happens: string;
+  how_to_fix: string;
+  how_to_prevent: string;
+}
+
+export interface StuckHelp {
+  first_hint: string;
+  second_hint: string;
+  detailed_walkthrough: string;
+  alternative_approach: string;
+  skip_option: {
+    available: boolean;
+    consequence: string;
+  };
+}
+
+export interface StepVariation {
+  condition: string;
+  modified_instruction: string;
+}
+
+export interface ExperienceStep {
   id: string;
+  step_number: number;
+  title: string;
+  instruction: string;
+  detailed_explanation: string;
+  
+  // Visual aids
+  image_url?: string;
+  video_url?: string;
+  video_timestamp?: string;
+  diagram_description?: string;
+  
+  // Interaction
+  interaction_type: 'do' | 'observe' | 'decide' | 'wait' | 'check';
+  user_action_required: string;
+  expected_outcome: string;
+  
+  // Help system
+  common_mistakes: CommonMistake[];
+  tips: string[];
+  if_stuck: StuckHelp;
+  
+  // Checkpoints
+  checkpoint: {
+    type: 'self_check' | 'photo_upload' | 'question_answer' | 'timer_complete';
+    prompt: string;
+    validation_hint: string;
+  };
+  
+  // Variations
+  variations?: StepVariation[];
+  
+  // AI prompts
+  ai_prompts: {
+    introduction: string;
+    during_step: string;
+    on_completion: string;
+    on_struggle: string;
+  };
+}
+
+export interface ExperiencePhase {
+  id: string;
+  phase_number: number;
   title: string;
   description: string;
-  category: string;
-  difficulty_level: 'beginner' | 'intermediate' | 'advanced';
-  estimated_time: string;
-  budget_required: 'low' | 'medium' | 'high';
-  instructions: {
-    intro: string;
-    steps: Array<{
-      step: number;
-      title: string;
-      description: string;
-      tip?: string;
-      video_timestamp?: string;
-    }>;
+  estimated_time: number; // minutes
+  steps: ExperienceStep[];
+  phase_checkpoint: {
+    question: string;
+    success_indicator: string;
+    if_stuck: string;
   };
-  video_links: Array<{
-    title: string;
-    url: string;
-    duration: string;
-  }>;
-  resource_links: Array<{
-    title: string;
-    url: string;
-  }>;
+}
+
+export interface CommonStruggle {
+  trigger_phrase: string[];
+  response: string;
+  additional_help: string;
+}
+
+export interface SuccessCriterion {
+  criterion: string;
+  how_to_verify: string;
+  partial_success: string;
+}
+
+export interface ExampleOutcome {
+  description: string;
+  image_url: string;
+  skill_level: string;
+  time_taken: string;
+}
+
+export interface EnhancedExperience {
+  id: string;
+  title: string;
+  tagline: string;
+  description: string;
+  
+  category: string;
+  subcategory: string;
   tags: string[];
-  materials?: string[];
-  success_criteria: string[];
-  imageUrl?: string;
+  
+  difficulty_level: 'absolute_beginner' | 'beginner' | 'intermediate' | 'advanced';
+  estimated_time: {
+    minimum: number;
+    typical: number;
+    extended: number;
+  };
+  budget: {
+    level: 'free' | 'low' | 'medium' | 'high';
+    estimated_cost: string;
+    alternatives: string;
+  };
+  
+  prerequisites: {
+    required_items: MaterialItem[];
+    optional_items: MaterialItem[];
+    required_skills: string[];
+    required_experiences: string[];
+    physical_requirements: string[];
+    space_requirements: string;
+  };
+  
+  phases: ExperiencePhase[];
+  
+  ai_guidance: {
+    persona: string;
+    tone: string;
+    common_struggles: CommonStruggle[];
+    encouragement_triggers: string[];
+    completion_celebration: string;
+  };
+  
+  success_criteria: SuccessCriterion[];
+  what_you_learned: string[];
+  next_experiences: string[];
+  
+  hero_image: string;
+  gallery: string[];
+  example_outcomes: ExampleOutcome[];
 }
 
 export interface WeeklyPackage {
@@ -52,7 +178,7 @@ export interface WeeklyPackage {
   user_id: string;
   start_date: string;
   end_date: string;
-  experiences: string[]; // Array of experience IDs
+  experiences: string[]; // IDs
   status: 'active' | 'completed' | 'expired';
 }
 
@@ -60,7 +186,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: number;
-  isTyping?: boolean;
+  type?: 'guidance' | 'question' | 'hint' | 'celebration' | 'struggle' | 'general';
 }
 
 export type ViewState = 'landing' | 'chat' | 'dashboard' | 'experience_detail';

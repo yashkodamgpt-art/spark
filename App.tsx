@@ -7,7 +7,6 @@ import ExperienceDetail from './components/ExperienceDetail';
 import { MOCK_EXPERIENCES } from './constants';
 
 function App() {
-  // Simple State Management for the single-page flow
   const [appState, setAppState] = useState<AppState>({
     view: 'landing',
     userProfile: null,
@@ -15,7 +14,6 @@ function App() {
     selectedExperienceId: null,
   });
 
-  // Effect to load data from localStorage (Mock persistence)
   useEffect(() => {
     const savedProfile = localStorage.getItem('user_profile');
     const savedPackage = localStorage.getItem('weekly_package');
@@ -31,19 +29,24 @@ function App() {
     }
   }, []);
 
-  // Handlers
   const handleStart = () => {
     setAppState(prev => ({ ...prev, view: 'chat' }));
   };
 
-  const handleProfileComplete = (profile: UserProfile) => {
+  const handleProfileComplete = (profileData: any) => {
+    // Merge generated profile data with default tier
+    const profile: UserProfile = {
+        ...profileData,
+        tier: 'free', // Default to free
+        name: 'Explorer' 
+    };
+
     // Generate a mock package based on the new profile
     const newPackage: WeeklyPackage = {
         id: crypto.randomUUID(),
         user_id: profile.id,
         start_date: new Date().toISOString(),
         end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        // Just picking first 7 for demo, in real app AI would select these IDs
         experiences: MOCK_EXPERIENCES.map(e => e.id).slice(0, 7),
         status: 'active'
     };
@@ -77,7 +80,20 @@ function App() {
       });
   };
 
-  // View Routing
+  const handleUpgrade = () => {
+      if (appState.userProfile) {
+          const updatedProfile: UserProfile = { ...appState.userProfile, tier: 'premium' };
+          localStorage.setItem('user_profile', JSON.stringify(updatedProfile));
+          setAppState(prev => ({ ...prev, userProfile: updatedProfile }));
+          alert("Welcome to Spark Premium! Your AI mentor is ready.");
+      }
+  };
+
+  // Find the selected experience from mock data
+  const selectedExperience = appState.selectedExperienceId 
+    ? MOCK_EXPERIENCES.find(e => e.id === appState.selectedExperienceId) 
+    : null;
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
         {/* Navigation Wrapper for Authenticated Views */}
@@ -88,13 +104,18 @@ function App() {
                         className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary cursor-pointer"
                         onClick={handleBackToDashboard}
                      >
-                        Experience.ai
+                        Spark
                      </div>
                      <div className="flex items-center gap-4">
+                        {appState.userProfile?.tier === 'free' && (
+                             <button onClick={handleUpgrade} className="text-sm font-semibold text-primary hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
+                                Upgrade Plan
+                             </button>
+                        )}
                         <button onClick={handleLogout} className="text-sm font-medium text-gray-500 hover:text-red-500">
                             Log Out
                         </button>
-                        <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${appState.userProfile?.tier === 'premium' ? 'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-md' : 'bg-primary'}`}>
                             {appState.userProfile?.name?.charAt(0) || 'U'}
                         </div>
                      </div>
@@ -102,7 +123,6 @@ function App() {
             </nav>
         )}
 
-        {/* View Switcher */}
         {appState.view === 'landing' && (
             <LandingPage onStart={handleStart} />
         )}
@@ -118,13 +138,15 @@ function App() {
                 appState={appState} 
                 onSelectExperience={handleSelectExperience}
                 onGenerateNewWeek={() => handleProfileComplete(appState.userProfile!)}
+                onUpgrade={handleUpgrade}
             />
         )}
 
-        {appState.view === 'experience_detail' && appState.selectedExperienceId && (
+        {appState.view === 'experience_detail' && selectedExperience && (
             <div className="py-8 px-4">
                 <ExperienceDetail 
-                    experience={MOCK_EXPERIENCES.find(e => e.id === appState.selectedExperienceId)!}
+                    experience={selectedExperience}
+                    userTier={appState.userProfile?.tier || 'free'}
                     onBack={handleBackToDashboard}
                     onComplete={() => alert('Marked as complete!')}
                 />
