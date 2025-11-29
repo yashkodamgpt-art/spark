@@ -1,0 +1,5 @@
+{
+  "name": "Experience Discovery App",
+  "description": "An AI-powered application that curates personalized weekly experiences for users based on their personality, interests, and preferences.",
+  "requestFramePermissions": []
+}
